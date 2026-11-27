@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace GameApi.Data;
 
-public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)
     {
@@ -15,10 +15,10 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
             .Build();
 
         var connectionString = configuration.GetConnectionString("Default")
-            ?? "Server=localhost;Port=3306;Database=game_asm1_demo;User ID=root;Password=123456;";
+            ?? throw new InvalidOperationException("Set ConnectionStrings:Default in appsettings.json or ConnectionStrings__Default in the environment.");
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0)))
+            .UseMySql(connectionString, AppDbContext.ServerVersion)
             .Options;
 
         return new AppDbContext(options);

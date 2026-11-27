@@ -5,15 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameApi.Services;
 
-public class CharacterService
+public sealed class CharacterService(AppDbContext db)
 {
-    private readonly AppDbContext _db;
-
-    public CharacterService(AppDbContext db)
-    {
-        _db = db;
-    }
-
     public async Task<CharacterResponse> CreateAsync(int accountId, CreateCharacterRequest request)
     {
         var character = new Character
@@ -22,39 +15,25 @@ public class CharacterService
             Class = request.Class,
             AccountId = accountId
         };
-
-        _db.Characters.Add(character);
-        await _db.SaveChangesAsync();
-
+        db.Characters.Add(character);
+        await db.SaveChangesAsync();
         return ToResponse(character);
     }
 
-    public async Task<CharacterResponse?> UpdateAsync(int accountId, int id, UpdateCharacterRequest request)
+    public async Task<CharacterResponse?> UpdateAsync(int accountId, int characterId, UpdateCharacterRequest request)
     {
-        var character = await _db.Characters
-            .FirstOrDefaultAsync(c => c.Id == id && c.AccountId == accountId);
-
+        var character = await db.Characters.SingleOrDefaultAsync(item => item.Id == characterId && item.AccountId == accountId);
         if (character is null)
-        {
             return null;
-        }
 
         character.Name = request.Name;
         character.Class = request.Class;
         character.Level = request.Level!.Value;
         character.Hp = request.Hp!.Value;
-        await _db.SaveChangesAsync();
-
+        await db.SaveChangesAsync();
         return ToResponse(character);
     }
 
-    private static CharacterResponse ToResponse(Character character) => new()
-    {
-        Id = character.Id,
-        Name = character.Name,
-        Class = character.Class,
-        Level = character.Level,
-        Hp = character.Hp,
-        AccountId = character.AccountId
-    };
+    private static CharacterResponse ToResponse(Character character) =>
+        new(character.Id, character.Name, character.Class, character.Level, character.Hp, character.AccountId);
 }

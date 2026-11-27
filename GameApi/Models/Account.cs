@@ -1,11 +1,10 @@
 namespace GameApi.Models;
 
-public class Account
+public sealed class Account
 {
     public int Id { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty;
+    public required string Username { get; set; }
+    public required string PasswordHash { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    public List<Character> Characters { get; set; } = new();
+    public ICollection<Character> Characters { get; set; } = new List<Character>();
 }

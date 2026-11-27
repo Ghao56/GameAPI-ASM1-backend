@@ -3,11 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameApi.Data;
 
-public class AppDbContext : DbContext
+public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
+    public static MySqlServerVersion ServerVersion { get; } = new(new Version(8, 0, 0));
 
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Character> Characters => Set<Character>();
@@ -16,20 +14,25 @@ public class AppDbContext : DbContext
     {
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.Property(a => a.Username).HasMaxLength(50).IsRequired();
-            entity.Property(a => a.PasswordHash).HasMaxLength(255).IsRequired();
-            entity.HasIndex(a => a.Username).IsUnique();
+            entity.HasKey(account => account.Id);
+            entity.Property(account => account.Username).HasMaxLength(50).IsRequired();
+            entity.Property(account => account.PasswordHash).HasMaxLength(255).IsRequired();
+            entity.Property(account => account.CreatedAt).IsRequired();
+            entity.HasIndex(account => account.Username).IsUnique();
+            entity.HasMany(account => account.Characters)
+                .WithOne(character => character.Account)
+                .HasForeignKey(character => character.AccountId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Character>(entity =>
         {
-            entity.Property(c => c.Name).HasMaxLength(50).IsRequired();
-            entity.Property(c => c.Class).HasMaxLength(30).IsRequired();
-
-            entity.HasOne(c => c.Account)
-                .WithMany(a => a.Characters)
-                .HasForeignKey(c => c.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasKey(character => character.Id);
+            entity.Property(character => character.Name).HasMaxLength(50).IsRequired();
+            entity.Property(character => character.Class).HasMaxLength(30).IsRequired();
+            entity.Property(character => character.Level).HasDefaultValue(1);
+            entity.Property(character => character.Hp).HasDefaultValue(100);
+            entity.Property(character => character.CreatedAt).IsRequired();
         });
     }
 }

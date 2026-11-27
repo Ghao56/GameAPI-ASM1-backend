@@ -16,16 +16,12 @@ Kiến trúc chia lớp ngang: `Models`, `Data`, `DTOs`, `Services`, `Controller
 
 | Thành phần | Phiên bản |
 |-----------|-----------|
-| .NET / ASP.NET Core | 10.0 (net10.0) |
-| Entity Framework Core | 10.0.14 |
-| Microting.EntityFrameworkCore.MySql | 10.0.14 |
-| Microsoft.AspNetCore.Authentication.JwtBearer | 10.0.14 |
-| Swashbuckle.AspNetCore | 11.0.1 |
+| .NET / ASP.NET Core | 9.0 (net9.0) |
+| Entity Framework Core | 9.0.0 |
+| Pomelo.EntityFrameworkCore.MySql | 9.0.0 |
+| Microsoft.AspNetCore.Authentication.JwtBearer | 9.0.23 |
+| Swashbuckle.AspNetCore | 6.6.2 |
 | MySQL Server | 8.x / 9.x, cổng 3306 |
-
-> Hướng dẫn dùng .NET 8/9 + Pomelo. Máy này chỉ có SDK 10, và Pomelo chưa có bản EF Core 10,
-> nên project dùng **Microting.EntityFrameworkCore.MySql 10.0.14** (bản fork của Pomelo, API
-> `UseMySql` / `MySqlServerVersion` giống hệt). Code nghiệp vụ không khác gì bản .NET 9.
 
 ## 3. Cấu trúc
 
@@ -35,7 +31,7 @@ Data/         AppDbContext, AppDbContextFactory (cho dotnet ef)
 DTOs/         Register/Login/CreateCharacter/UpdateCharacter request + response
 Services/     AuthService (băm mật khẩu, tạo JWT), CharacterService (kiểm chủ sở hữu)
 Controllers/  AuthController, CharactersController (chọn mã HTTP)
-Migrations/   InitialCreate
+Migrations/   InitialCreate, AddCharacters
 ```
 
 Controller không truy cập `DbContext`; service không trả mã HTTP.
@@ -45,7 +41,7 @@ Controller không truy cập `DbContext`; service không trả mã HTTP.
 1. Tạo database (MySQL Workbench, tài khoản root):
 
 ```sql
-CREATE DATABASE IF NOT EXISTS game_asm1_demo
+CREATE DATABASE IF NOT EXISTS game_asm1
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 ```
@@ -53,19 +49,22 @@ CREATE DATABASE IF NOT EXISTS game_asm1_demo
 2. Kiểm tra chuỗi kết nối và khóa JWT trong `appsettings.json` (khóa phải ≥ 32 ký tự):
 
 ```json
-"ConnectionStrings": { "Default": "Server=localhost;Port=3306;Database=game_asm1_demo;User ID=root;Password=123456;" },
-"Jwt": { "Key": "GameApi-ASM1-Secret-Key-At-Least-32-Characters-2026" }
+"ConnectionStrings": { "Default": "Server=127.0.0.1;Port=3306;Database=game_asm1;User=root;Password=123456;" },
+"Jwt": { "Key": "GAM106-ASM1-Dev-Key-2026-0123456789abcdef-0123456789abcdef" }
 ```
+
+Muốn không ghi mật khẩu vào file thì chạy `.\run-local.ps1` để truyền mật khẩu MySQL và khóa JWT qua biến môi trường.
 
 3. Tạo bảng và chạy:
 
 ```powershell
+dotnet tool restore
 dotnet restore
 dotnet ef database update   # hoặc để app tự Database.Migrate() khi khởi động
 dotnet run
 ```
 
-Mở `http://localhost:5292/swagger` (trang `/` tự chuyển sang Swagger).
+Mở `http://localhost:5254/swagger`.
 
 Nếu model thay đổi: `dotnet ef migrations add <TenMigration>` rồi `dotnet ef database update`.
 
@@ -96,9 +95,9 @@ trong MySQL bắt đầu bằng `AQAAAA...`; PUT thiếu `hp` cũng trả 400 (n
 
 | Triệu chứng | Cách sửa |
 |-------------|----------|
-| `Access denied for user 'root'@'localhost'` | Sửa user/mật khẩu trong `appsettings.json` |
+| `Access denied for user 'root'@'localhost'` | Sửa user/mật khẩu trong `appsettings.json` hoặc dùng `run-local.ps1` |
 | `Unable to connect to any of the specified MySQL hosts` | Bật dịch vụ MySQL (`Get-Service *mysql*`), kiểm tra cổng 3306 |
-| `Unknown database 'game_asm1_demo'` | Chạy `CREATE DATABASE` ở mục 4 |
+| `Unknown database 'game_asm1'` | Chạy `CREATE DATABASE` ở mục 4 |
 | `Table '...accounts' doesn't exist` | `dotnet ef database update`, hoặc build lại rồi chạy |
 | Đã Authorize vẫn 401 | Dán đúng token (không thêm "Bearer"), `UseAuthentication()` phải đứng trước `UseAuthorization()` |
 | `IDX10720` khi đăng nhập | `Jwt:Key` ngắn hơn 32 ký tự |

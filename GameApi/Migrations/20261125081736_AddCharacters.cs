@@ -7,32 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GameApi.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddCharacters : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Accounts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PasswordHash = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Accounts", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Characters",
                 columns: table => new
@@ -43,8 +22,8 @@ namespace GameApi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Class = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Level = table.Column<int>(type: "int", nullable: false),
-                    Hp = table.Column<int>(type: "int", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    Hp = table.Column<int>(type: "int", nullable: false, defaultValue: 100),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     AccountId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -61,12 +40,6 @@ namespace GameApi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Accounts_Username",
-                table: "Accounts",
-                column: "Username",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Characters_AccountId",
                 table: "Characters",
                 column: "AccountId");
@@ -77,9 +50,6 @@ namespace GameApi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Characters");
-
-            migrationBuilder.DropTable(
-                name: "Accounts");
         }
     }
 }

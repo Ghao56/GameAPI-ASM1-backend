@@ -7,35 +7,32 @@ using Microsoft.AspNetCore.Mvc;
 namespace GameApi.Controllers;
 
 [ApiController]
-[Route("api/characters")]
 [Authorize]
-public class CharactersController : ControllerBase
+[Route("api/characters")]
+public sealed class CharactersController(CharacterService characterService) : ControllerBase
 {
-    private readonly CharacterService _characterService;
-
-    public CharactersController(CharacterService characterService)
-    {
-        _characterService = characterService;
-    }
-
     [HttpPost]
+    [ProducesResponseType<CharacterResponse>(StatusCodes.Status201Created)]
     public async Task<IActionResult> Create(CreateCharacterRequest request)
     {
-        var accountId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var character = await _characterService.CreateAsync(accountId, request);
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var accountId))
+            return Unauthorized();
+
+        var character = await characterService.CreateAsync(accountId, request);
         return StatusCode(StatusCodes.Status201Created, character);
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType<CharacterResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateCharacterRequest request)
     {
-        var accountId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var character = await _characterService.UpdateAsync(accountId, id, request);
-        if (character is null)
-        {
-            return NotFound(new { message = "Không tìm thấy nhân vật của bạn" });
-        }
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var accountId))
+            return Unauthorized();
 
-        return Ok(character);
+        var character = await characterService.UpdateAsync(accountId, id, request);
+        return character is null
+            ? NotFound(new { message = "Không tìm thấy nhân vật của bạn" })
+            : Ok(character);
     }
 }

@@ -6,36 +6,29 @@ namespace GameApi.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+public sealed class AuthController(AuthService authService) : ControllerBase
 {
-    private readonly AuthService _authService;
-
-    public AuthController(AuthService authService)
-    {
-        _authService = authService;
-    }
-
     [HttpPost("register")]
+    [ProducesResponseType<AccountResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var account = await _authService.RegisterAsync(request);
-        if (account is null)
-        {
-            return Conflict(new { message = "Tên đăng nhập đã tồn tại" });
-        }
-
-        return StatusCode(StatusCodes.Status201Created, account);
+        var account = await authService.RegisterAsync(request);
+        return account is null
+            ? Conflict(new { message = "Tên đăng nhập đã tồn tại" })
+            : StatusCode(StatusCodes.Status201Created, account);
     }
 
     [HttpPost("login")]
+    [ProducesResponseType<LoginResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var response = await _authService.LoginAsync(request);
-        if (response is null)
-        {
-            return Unauthorized(new { message = "Sai tên đăng nhập hoặc mật khẩu" });
-        }
-
-        return Ok(response);
+        var result = await authService.LoginAsync(request);
+        return result is null
+            ? Unauthorized(new { message = "Sai tên đăng nhập hoặc mật khẩu" })
+            : Ok(result);
     }
 }
