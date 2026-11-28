@@ -1,6 +1,42 @@
 @GameApi_HostAddress = http://localhost:5254
+@token = paste-token-from-login-here
 
-GET {{GameApi_HostAddress}}/weatherforecast/
-Accept: application/json
+### TC01/TC02 - Đăng ký
+POST {{GameApi_HostAddress}}/api/auth/register
+Content-Type: application/json
 
-###
+{
+  "username": "sinhvien01",
+  "password": "123456"
+}
+
+### TC04/TC05 - Đăng nhập
+POST {{GameApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "sinhvien01",
+  "password": "123456"
+}
+
+### TC08 - Tạo nhân vật
+POST {{GameApi_HostAddress}}/api/characters
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Hiep Si Rong",
+  "class": "Warrior"
+}
+
+### TC10/TC11 - Sửa nhân vật
+PUT {{GameApi_HostAddress}}/api/characters/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Hiep Si Rong",
+  "class": "Paladin",
+  "level": 5,
+  "hp": 250
+}

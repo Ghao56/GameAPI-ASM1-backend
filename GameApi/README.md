@@ -46,14 +46,14 @@ CREATE DATABASE IF NOT EXISTS game_asm1
     COLLATE utf8mb4_unicode_ci;
 ```
 
-2. Thêm chuỗi kết nối (có mật khẩu) và khóa JWT vào `appsettings.json` (khóa phải ≥ 32 ký tự):
+2. `appsettings.json` đã có sẵn chuỗi kết nối mẫu (`root` / `123456`, database `game_asm1`) và `Jwt:Key` ≥ 32 ký tự. Nếu MySQL của bạn khác thì sửa lại:
 
 ```json
 "ConnectionStrings": { "Default": "Server=127.0.0.1;Port=3306;Database=game_asm1;User=root;Password=123456;" },
 "Jwt": { "Key": "GAM106-ASM1-Dev-Key-2026-0123456789abcdef-0123456789abcdef" }
 ```
 
-Muốn không ghi mật khẩu vào file thì chạy `.\run-local.ps1` để truyền mật khẩu MySQL và khóa JWT qua biến môi trường.
+Muốn không ghi mật khẩu vào file thì chạy `.\run-local.ps1` để truyền mật khẩu MySQL và khóa JWT qua biến môi trường (biến môi trường sẽ ghi đè `appsettings.json`).
 
 3. Tạo bảng và chạy:
 
