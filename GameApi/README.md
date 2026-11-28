@@ -16,10 +16,10 @@ Kiến trúc chia lớp ngang: `Models`, `Data`, `DTOs`, `Services`, `Controller
 
 | Thành phần | Phiên bản |
 |-----------|-----------|
-| .NET / ASP.NET Core | 9.0 (net9.0) |
+| .NET / ASP.NET Core | 10.0 (net10.0) |
 | Entity Framework Core | 9.0.0 |
 | Pomelo.EntityFrameworkCore.MySql | 9.0.0 |
-| Microsoft.AspNetCore.Authentication.JwtBearer | 9.0.23 |
+| Microsoft.AspNetCore.Authentication.JwtBearer | 10.0.0 |
 | Swashbuckle.AspNetCore | 6.6.2 |
 | MySQL Server | 8.x / 9.x, cổng 3306 |
 
@@ -46,7 +46,7 @@ CREATE DATABASE IF NOT EXISTS game_asm1
     COLLATE utf8mb4_unicode_ci;
 ```
 
-2. Kiểm tra chuỗi kết nối và khóa JWT trong `appsettings.json` (khóa phải ≥ 32 ký tự):
+2. Thêm chuỗi kết nối (có mật khẩu) và khóa JWT vào `appsettings.json` (khóa phải ≥ 32 ký tự):
 
 ```json
 "ConnectionStrings": { "Default": "Server=127.0.0.1;Port=3306;Database=game_asm1;User=root;Password=123456;" },
@@ -60,7 +60,7 @@ Muốn không ghi mật khẩu vào file thì chạy `.\run-local.ps1` để tru
 ```powershell
 dotnet tool restore
 dotnet restore
-dotnet ef database update   # hoặc để app tự Database.Migrate() khi khởi động
+dotnet ef database update
 dotnet run
 ```
 

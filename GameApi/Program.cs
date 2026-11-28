@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,9 +29,10 @@ builder.Services.AddSwaggerGen(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("ConnectionStrings:Default is not configured. Run .\\run-local.ps1 or set ConnectionStrings__Default in the API process environment.");
-if (string.IsNullOrEmpty(new MySqlConnectionStringBuilder(connectionString).Password))
+if (string.IsNullOrEmpty(new MySqlConnector.MySqlConnectionStringBuilder(connectionString).Password))
     throw new InvalidOperationException("MySQL password is missing. Run .\\run-local.ps1 or set ConnectionStrings__Default in the API process environment.");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(connectionString, AppDbContext.ServerVersion));
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 0));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(connectionString, serverVersion));
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CharacterService>();
 
@@ -55,10 +55,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
-using var scope = app.Services.CreateScope();
-scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
-
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseAuthentication();

@@ -5,8 +5,6 @@ namespace GameApi.Data;
 
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public static MySqlServerVersion ServerVersion { get; } = new(new Version(8, 0, 0));
-
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Character> Characters => Set<Character>();
 

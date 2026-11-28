@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
 
 namespace GameApi.Data;
 
@@ -8,17 +7,10 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
 {
     public AppDbContext CreateDbContext(string[] args)
     {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true)
-            .AddEnvironmentVariables()
-            .Build();
-
-        var connectionString = configuration.GetConnectionString("Default")
-            ?? throw new InvalidOperationException("Set ConnectionStrings:Default in appsettings.json or ConnectionStrings__Default in the environment.");
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySql(connectionString, AppDbContext.ServerVersion)
+            .UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0)))
             .Options;
 
         return new AppDbContext(options);
