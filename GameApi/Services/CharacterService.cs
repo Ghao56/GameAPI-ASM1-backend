@@ -34,6 +34,27 @@ public sealed class CharacterService(AppDbContext db)
         return ToResponse(character);
     }
 
+    public async Task<List<CharacterResponse>> GetMineAsync(int accountId)
+    {
+        var characters = await db.Characters
+            .AsNoTracking()
+            .Where(item => item.AccountId == accountId)
+            .OrderBy(item => item.Id)
+            .ToListAsync();
+        return characters.Select(ToResponse).ToList();
+    }
+
+    public async Task<bool> DeleteAsync(int accountId, int characterId)
+    {
+        var character = await db.Characters.FindAsync(characterId);
+        if (character is null || character.AccountId != accountId)
+            return false;
+
+        db.Characters.Remove(character);
+        await db.SaveChangesAsync();
+        return true;
+    }
+
     private static CharacterResponse ToResponse(Character character) =>
         new(character.Id, character.Name, character.Class, character.Level, character.Hp, character.AccountId);
 }

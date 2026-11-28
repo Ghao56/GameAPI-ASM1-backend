@@ -40,3 +40,11 @@ Content-Type: application/json
   "level": 5,
   "hp": 250
 }
+
+### Lab 5 - Danh sách nhân vật của tôi
+GET {{GameApi_HostAddress}}/api/characters
+Authorization: Bearer {{token}}
+
+### Lab 5 - Xóa nhân vật của tôi
+DELETE {{GameApi_HostAddress}}/api/characters/1
+Authorization: Bearer {{token}}
